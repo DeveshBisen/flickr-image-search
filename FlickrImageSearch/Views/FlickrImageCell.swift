@@ -35,14 +35,22 @@ class FlickrImageCell: UICollectionViewCell {
         super.init(coder: coder)
     }
 
-    // MARK: Private helper method
+    // MARK: Lifecycle method
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        image = nil
+    }
+
+    // MARK: Private helper methods
 
     private func setupAndStylizeSubviews() {
         layer.cornerRadius = FlickrImageCell.cornerRadius
-        imageView.layer.cornerRadius = FlickrImageCell.cornerRadius
+        clipsToBounds = true
 
         addSubview(imageView)
         imageView.backgroundColor = FlickrImageCell.backroundColor
+        imageView.contentMode = .scaleAspectFill
         setupConstraints()
     }
 

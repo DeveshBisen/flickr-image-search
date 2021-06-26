@@ -18,6 +18,8 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     private static let imageViewHeight: CGFloat = 200
     private static let cellReuseIdentifier = "imageCellID"
     private static let defaultBackroundColor = UIColor.init(displayP3Red: 120/256, green: 160/256, blue: 200/256, alpha: 1)
+    private static let instructionLabelText = "Enter search keyword and hit enter."
+    private static let viewControllerTitleLabelText = "Flickr Image Search"
 
     // MARK: Private properties
 
@@ -29,19 +31,13 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         }
     }
 
-    private lazy var viewControllerTitleLabel: UILabel? = {
-        let label = UILabel()
-        label.text = "Flickr Image Search"
-        label.textColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textAlignment = .center
-        label.backgroundColor = UIColor.clear
-        label.sizeToFit()
-        return label
-    }()
+    private let instructionLabel = UILabel()
+    private let viewControllerTitleLabel = UILabel()
 
     let searchBar = UISearchBar()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+
+    var fetchedImages: [FlickrImages]?
 
     // MARK: Lifecycle methods
 
@@ -57,15 +53,26 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     // MARK: Private helper methods
 
     private func setupViewHierarchy() {
-        if let viewControllerTitleLabel = viewControllerTitleLabel {
-            view.addSubview(viewControllerTitleLabel)
-        }
+        view.addSubview(viewControllerTitleLabel)
         view.addSubview(searchBar)
         view.addSubview(collectionView)
+        view.addSubview(instructionLabel)
     }
 
     private func setupSubviews() {
         searchBar.delegate = self
+
+        viewControllerTitleLabel.text = ViewController.viewControllerTitleLabelText
+        viewControllerTitleLabel.textColor = UIColor.white
+        viewControllerTitleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        viewControllerTitleLabel.textAlignment = .center
+        viewControllerTitleLabel.backgroundColor = UIColor.clear
+        viewControllerTitleLabel.sizeToFit()
+
+        instructionLabel.textColor = UIColor.white
+        instructionLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        instructionLabel.text = ViewController.instructionLabelText
+        instructionLabel.sizeToFit()
 
         collectionView.backgroundColor = ViewController.defaultBackroundColor
         collectionView.delegate   = self
@@ -78,25 +85,21 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         var constraintsArray: [NSLayoutConstraint] = []
 
         // Title label constraints
-        if let viewControllerTitleLabel = viewControllerTitleLabel {
-            viewControllerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-            constraintsArray.append(contentsOf: [
-                viewControllerTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
-                viewControllerTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
-                viewControllerTitleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: statusBarHeight + ViewController.titleLabelTopSpacing)
-            ])
-        }
+        viewControllerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        constraintsArray.append(contentsOf: [
+            viewControllerTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
+            viewControllerTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
+            viewControllerTitleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: statusBarHeight + ViewController.titleLabelTopSpacing)
+        ])
 
         // Search bar constraints
-        if let searchBarTopView = viewControllerTitleLabel ?? view {
-            searchBar.translatesAutoresizingMaskIntoConstraints = false
-            constraintsArray.append(contentsOf: [
-                searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
-                searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
-                searchBar.topAnchor.constraint(equalTo: searchBarTopView.bottomAnchor, constant: ViewController.verticalViewSpacing),
-                searchBar.heightAnchor.constraint(equalToConstant: ViewController.searchBarHeight),
-            ])
-        }
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        constraintsArray.append(contentsOf: [
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
+            searchBar.topAnchor.constraint(equalTo: viewControllerTitleLabel.bottomAnchor, constant: ViewController.verticalViewSpacing),
+            searchBar.heightAnchor.constraint(equalToConstant: ViewController.searchBarHeight),
+        ])
 
         // Collection view constraints
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -107,21 +110,63 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
+        // Collection view constraints
+        instructionLabel.translatesAutoresizingMaskIntoConstraints = false
+        constraintsArray.append(contentsOf: [
+            instructionLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
+            instructionLabel.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
+        ])
+
         // Activate constraints
         if constraintsArray.count > 0 {
             NSLayoutConstraint.activate(constraintsArray)
         }
     }
 
+    private func fetchImages(for searchKey: String) {
+        NetworkManager.shared.fetchImagesMetadata(for: searchKey) { [weak self] reponse, error in
+            if error != nil {
+                return
+            }
+
+            guard let strongInstance = self else {
+                return
+            }
+
+            strongInstance.fetchedImages = reponse?.photos?.photo
+            DispatchQueue.main.async {
+                strongInstance.collectionView.reloadData()
+            }
+        }
+    }
+
     // MARK: UICollectionViewDataSource
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        let imageCount = fetchedImages?.count ?? 0
+        instructionLabel.isHidden = imageCount > 0
+        return imageCount
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let imageCell = collectionView.dequeueReusableCell(withReuseIdentifier: ViewController.cellReuseIdentifier, for: indexPath) as? FlickrImageCell else {
             return FlickrImageCell(frame: .zero)
+        }
+
+        if indexPath.row < fetchedImages?.count ?? 0,
+           let imageInfo = fetchedImages?[indexPath.row],
+           let imageID = imageInfo.id,
+           let serverID = imageInfo.server,
+           let secretKey = imageInfo.secret {
+            NetworkManager.shared.downloadImage(imageID: imageID, serverID: serverID, secretKey: secretKey) { data, error in
+                DispatchQueue.main.async {
+                    if let data = data {
+                        imageCell.image = UIImage(data: data)
+                    }
+                }
+            }
+        } else {
+            imageCell.image = UIImage(named: "placeholderImage")
         }
         return imageCell
     }
@@ -139,7 +184,6 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     // MARK: UISearchBarDelegate
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let searchedText: String = searchBar.text ?? ""
-        print(searchedText)
+        fetchImages(for: searchBar.text ?? "")
     }
 }
