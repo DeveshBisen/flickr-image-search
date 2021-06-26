@@ -28,7 +28,7 @@ final class NetworkManager {
     /**
      API doc for query format - https://www.flickr.com/services/api/explore/flickr.photos.search
      */
-    public func fetchImagesMetadata(for searchKey: String, completion: @escaping (FlickrImagesSearchResponse?, Error?) -> (Void)) {
+    public func fetchImagesMetadata(for searchKey: String, completion: @escaping (FlickrImagesSearchResultModel?, Error?) -> (Void)) {
         guard let requestUrl = NetworkManager.url(for: searchKey) else {
             completion(nil, NSError())
             return
@@ -44,7 +44,7 @@ final class NetworkManager {
             }
 
             do {
-                let response = try JSONDecoder().decode(FlickrImagesSearchResponse.self, from: data)
+                let response = try JSONDecoder().decode(FlickrImagesSearchResultModel.self, from: data)
                 completion(response, nil)
             } catch let error {
                 completion(nil, error)

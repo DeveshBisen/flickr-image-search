@@ -11,15 +11,18 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
 
     // MARK: Constants
 
-    private static let leftRightSpacing: CGFloat = 8.0
-    private static let titleLabelTopSpacing: CGFloat = 16.0
-    private static let verticalViewSpacing: CGFloat = 8.0
     private static let searchBarHeight: CGFloat = 50
     private static let imageViewHeight: CGFloat = 200
+    private static let leftRightSpacing: CGFloat = 8.0
+    private static let verticalViewSpacing: CGFloat = 8.0
+    private static let titleLabelTopSpacing: CGFloat = 16.0
+    private static let minimumInteritemSpacing: CGFloat = 4.0
+
     private static let cellReuseIdentifier = "imageCellID"
-    private static let defaultBackroundColor = UIColor.init(displayP3Red: 120/256, green: 160/256, blue: 200/256, alpha: 1)
-    private static let searchInstructionLabelText = "Enter search keyword and hit enter."
     private static let viewControllerTitleLabelText = "Flickr Image Search"
+    private static let searchInstructionLabelText = "Enter search keyword and hit enter."
+
+    private static let defaultBackroundColor = UIColor.init(displayP3Red: 120/256, green: 160/256, blue: 200/256, alpha: 1)
 
     // MARK: Private properties
 
@@ -78,9 +81,9 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         searchInstructionLabel.sizeToFit()
 
         collectionView.backgroundColor = ViewController.defaultBackroundColor
-        collectionView.delegate   = self
-        collectionView.dataSource = self
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 16.0, right: 0)
+        collectionView.delegate = self
+        collectionView.dataSource = self
         collectionView.register(FlickrImageCell.self, forCellWithReuseIdentifier: ViewController.cellReuseIdentifier)
     }
 
@@ -113,7 +116,7 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        // Collection view constraints
+        // Search instruction label constraints
         searchInstructionLabel.translatesAutoresizingMaskIntoConstraints = false
         constraintsArray.append(contentsOf: [
             searchInstructionLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
@@ -135,7 +138,9 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let imageCell = collectionView.dequeueReusableCell(withReuseIdentifier: ViewController.cellReuseIdentifier, for: indexPath) as? FlickrImageCell else {
+        guard let imageCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: ViewController.cellReuseIdentifier,
+                for: indexPath) as? FlickrImageCell else {
             return FlickrImageCell(frame: .zero)
         }
 
@@ -159,12 +164,18 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
 
     // MARK: UICollectionViewDelegateFlowLayout
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 4.0
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return ViewController.minimumInteritemSpacing
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.size.width - (2 * 8.0), height: ViewController.imageViewHeight)
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(
+            width: collectionView.frame.size.width - (2 * ViewController.leftRightSpacing),
+            height: ViewController.imageViewHeight)
     }
 
     // MARK: UISearchBarDelegate

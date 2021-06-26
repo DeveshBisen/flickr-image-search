@@ -7,22 +7,22 @@
 
 import Foundation
 
-struct FlickrImagesSearchResponse: Codable {
+struct FlickrImagesSearchResultModel: Codable {
 
-    var photos: FlickrImagesData?
+    var photos: FlickrImagesPaginationModel?
     var stat: String?
 }
 
-struct FlickrImagesData: Codable {
+struct FlickrImagesPaginationModel: Codable {
 
     var page: Int?
     var pages: Int?
     var perpage: Int?
     var total: Int?
-    var photo: [FlickrImages]?
+    var photo: [FlickrImagesModel]?
 }
 
-struct FlickrImages: Codable {
+struct FlickrImagesModel: Codable {
 
     var id: String?
     var owner: String?

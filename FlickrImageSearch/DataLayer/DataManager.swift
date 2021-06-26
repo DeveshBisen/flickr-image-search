@@ -15,7 +15,7 @@ final class DataManager {
 
     // MARK: Readonly property
 
-    public private(set) var fetchedImages: [FlickrImages]?
+    public private(set) var fetchedImages: [FlickrImagesModel]?
 
     // MARK: Initalizer
 
