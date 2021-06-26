@@ -149,11 +149,9 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
            let imageID = imageInfo.id,
            let serverID = imageInfo.server,
            let secretKey = imageInfo.secret {
-            NetworkManager.shared.downloadImage(imageID: imageID, serverID: serverID, secretKey: secretKey) { data, error in
+            DataManager.shared.getImage(for: imageID, serverID: serverID, secretKey: secretKey) { image in
                 DispatchQueue.main.async {
-                    if let data = data {
-                        imageCell.image = UIImage(data: data)
-                    }
+                    imageCell.image = image
                 }
             }
         } else {
@@ -181,9 +179,10 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     // MARK: UISearchBarDelegate
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        DataManager.shared.fetchImages(for: searchBar.text ?? "") { [weak self] in
+        DataManager.shared.fetchImagesMetadata(for: searchBar.text ?? "") { [weak self] in
             DispatchQueue.main.async {
                 self?.collectionView.reloadData()
+                self?.collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
             }
         }
     }

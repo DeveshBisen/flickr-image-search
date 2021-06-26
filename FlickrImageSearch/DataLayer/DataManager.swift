@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 final class DataManager {
 
@@ -13,19 +14,21 @@ final class DataManager {
 
     static let shared = DataManager()
 
-    // MARK: Readonly property
+    // MARK: Properties
 
     public private(set) var fetchedImages: [FlickrImagesModel]?
+    private let imageCache = NSCache<NSString, UIImage>()
 
     // MARK: Initalizer
 
     private init() {
-        // NO-OP
+        // Approx 30 MB image cache
+        imageCache.totalCostLimit = 30_000_000
     }
 
     // MARK: Public helper methods
 
-    func fetchImages(for searchKey: String, completion: @escaping () -> ()) {
+    func fetchImagesMetadata(for searchKey: String, completion: @escaping () -> ()) {
         NetworkManager.shared.fetchImagesMetadata(for: searchKey) { [weak self] reponse, error in
             guard error == nil, let photos = reponse?.photos?.photo else {
                 return
@@ -33,6 +36,33 @@ final class DataManager {
 
             self?.fetchedImages = photos
             completion()
+        }
+    }
+
+    public func getImage(for imageID: String,
+                         serverID: String,
+                         secretKey: String,
+                         completion: @escaping (UIImage?) -> (Void)) {
+        if let image = imageCache.object(forKey: imageID as NSString) {
+            completion(image)
+            print("Image fetched from cache")
+            return
+        }
+
+        NetworkManager.shared.downloadImage(
+            imageID: imageID,
+            serverID: serverID,
+            secretKey: secretKey) { [weak self] data, error in
+            guard let data = data,
+                  let downloadedImage = UIImage(data: data),
+                  error == nil else {
+                completion(UIImage(named: "placeholderImage"))
+                return
+            }
+
+            print("Image successfully fetched from network")
+            self?.imageCache.setObject(downloadedImage, forKey: imageID as NSString)
+            completion(downloadedImage)
         }
     }
 }
