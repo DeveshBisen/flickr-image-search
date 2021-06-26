@@ -7,20 +7,21 @@
 
 import UIKit
 
-class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     // MARK: Constants
 
-    private static let searchBarHeight: CGFloat = 50
     private static let imageViewHeight: CGFloat = 200
+    private static let searchBarViewHeight: CGFloat = 40
+
     private static let leftRightSpacing: CGFloat = 8.0
     private static let verticalViewSpacing: CGFloat = 8.0
     private static let titleLabelTopSpacing: CGFloat = 16.0
     private static let minimumInteritemSpacing: CGFloat = 4.0
 
-    private static let cellReuseIdentifier = "imageCellID"
+    private static let cellReuseIdentifier = "imageCellReuseID"
     private static let viewControllerTitleLabelText = "Flickr Image Search"
-    private static let searchInstructionLabelText = "Enter search keyword and hit enter."
+    private static let searchImageNotFoundText = "Photos for entered search keyword not found"
 
     private static let defaultBackroundColor = UIColor.init(displayP3Red: 120/256, green: 160/256, blue: 200/256, alpha: 1)
 
@@ -34,10 +35,10 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         }
     }
 
-    private let searchInstructionLabel = UILabel()
+    private let imageNotFoundLabel = UILabel()
     private let viewControllerTitleLabel = UILabel()
 
-    let searchBar = UISearchBar()
+    let searchBarView = SearchBarView()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
     // MARK: Lifecycle methods
@@ -53,20 +54,20 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        searchBar.becomeFirstResponder()
+        searchBarView.becomeFirstResponder()
     }
 
     // MARK: Private helper methods
 
     private func setupViewHierarchy() {
         view.addSubview(viewControllerTitleLabel)
-        view.addSubview(searchBar)
+        view.addSubview(searchBarView)
         view.addSubview(collectionView)
-        view.addSubview(searchInstructionLabel)
+        view.addSubview(imageNotFoundLabel)
     }
 
     private func setupSubviews() {
-        searchBar.delegate = self
+        searchBarView.searchDelegate = self
 
         viewControllerTitleLabel.text = ViewController.viewControllerTitleLabelText
         viewControllerTitleLabel.textColor = UIColor.white
@@ -75,10 +76,11 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         viewControllerTitleLabel.backgroundColor = UIColor.clear
         viewControllerTitleLabel.sizeToFit()
 
-        searchInstructionLabel.textColor = UIColor.white
-        searchInstructionLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        searchInstructionLabel.text = ViewController.searchInstructionLabelText
-        searchInstructionLabel.sizeToFit()
+        imageNotFoundLabel.textColor = UIColor.white
+        imageNotFoundLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        imageNotFoundLabel.text = ViewController.searchImageNotFoundText
+        imageNotFoundLabel.sizeToFit()
+        imageNotFoundLabel.isHidden = true
 
         collectionView.backgroundColor = ViewController.defaultBackroundColor
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 16.0, right: 0)
@@ -99,12 +101,12 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         ])
 
         // Search bar constraints
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBarView.translatesAutoresizingMaskIntoConstraints = false
         constraintsArray.append(contentsOf: [
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
-            searchBar.topAnchor.constraint(equalTo: viewControllerTitleLabel.bottomAnchor, constant: ViewController.verticalViewSpacing),
-            searchBar.heightAnchor.constraint(equalToConstant: ViewController.searchBarHeight),
+            searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
+            searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
+            searchBarView.topAnchor.constraint(equalTo: viewControllerTitleLabel.bottomAnchor, constant: ViewController.verticalViewSpacing),
+            searchBarView.heightAnchor.constraint(equalToConstant: ViewController.searchBarViewHeight),
         ])
 
         // Collection view constraints
@@ -112,15 +114,15 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         constraintsArray.append(contentsOf: [
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewController.leftRightSpacing),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewController.leftRightSpacing),
-            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: ViewController.verticalViewSpacing),
+            collectionView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor, constant: ViewController.verticalViewSpacing),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
         // Search instruction label constraints
-        searchInstructionLabel.translatesAutoresizingMaskIntoConstraints = false
+        imageNotFoundLabel.translatesAutoresizingMaskIntoConstraints = false
         constraintsArray.append(contentsOf: [
-            searchInstructionLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
-            searchInstructionLabel.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
+            imageNotFoundLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
+            imageNotFoundLabel.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
         ])
 
         // Activate constraints
@@ -132,17 +134,14 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     // MARK: UICollectionViewDataSource
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let imageCount = DataManager.shared.fetchedImages?.count ?? 0
-        searchInstructionLabel.isHidden = imageCount > 0
-        return imageCount
+        return DataManager.shared.fetchedImages?.count ?? 0
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let imageCell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: ViewController.cellReuseIdentifier,
-                for: indexPath) as? FlickrImageCell else {
-            return FlickrImageCell(frame: .zero)
-        }
+        let reusableCell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: ViewController.cellReuseIdentifier,
+            for: indexPath) as? FlickrImageCell
+        let imageCell = reusableCell ?? FlickrImageCell(frame: .zero)
 
         if indexPath.row < DataManager.shared.fetchedImages?.count ?? 0,
            let imageInfo = DataManager.shared.fetchedImages?[indexPath.row],
@@ -176,13 +175,23 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
             height: ViewController.imageViewHeight)
     }
 
-    // MARK: UISearchBarDelegate
+    // MARK: SearchBarViewDelegate
 
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        DataManager.shared.fetchImagesMetadata(for: searchBar.text ?? "") { [weak self] in
-            DispatchQueue.main.async {
-                self?.collectionView.reloadData()
-                self?.collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+    func didTapSearchIcon(searchText: String) {
+        if !searchText.isEmpty {
+            DataManager.shared.fetchImagesMetadata(for: searchText) { [weak self] in
+                let weakSelf = self
+                DispatchQueue.main.async { [weakSelf] in
+                    weakSelf?.collectionView.reloadData()
+
+                    // Scroll to top after collection view reload
+                    if (weakSelf?.collectionView.numberOfItems(inSection: 0) ?? 0) > 0 {
+                        weakSelf?.collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+                        weakSelf?.imageNotFoundLabel.isHidden = true
+                    } else {
+                        weakSelf?.imageNotFoundLabel.isHidden = false
+                    }
+                }
             }
         }
     }

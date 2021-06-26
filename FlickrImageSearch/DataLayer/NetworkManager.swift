@@ -15,7 +15,11 @@ final class NetworkManager {
 
     // MARK: Constants
 
-    private static let publicAPIKey = "3737be8cb5f107dcfe786aaa389fc889"
+    /**
+     Since this is public API keys, it's gets exprired after 24 hours.
+     We need to use latest key for accessing Flickr API.
+     */
+    private static let publicAPIKey = "1599b5d9c1683251cff2f8ea545cf102"
 
     // MARK: Initalizer
 
