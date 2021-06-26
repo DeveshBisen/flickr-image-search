@@ -37,6 +37,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		506C491C2687124800C2B525 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		50FA53412686E69400271485 = {
 			isa = PBXGroup;
 			children = (
@@ -56,15 +63,24 @@
 		50FA534C2686E69400271485 /* FlickrImageSearch */ = {
 			isa = PBXGroup;
 			children = (
+				506C491C2687124800C2B525 /* Views */,
+				50FA53642686EE0200271485 /* ViewController */,
 				50FA534D2686E69400271485 /* AppDelegate.swift */,
 				50FA534F2686E69400271485 /* SceneDelegate.swift */,
-				50FA53512686E69400271485 /* ViewController.swift */,
 				50FA53532686E69400271485 /* Main.storyboard */,
 				50FA53562686E69400271485 /* Assets.xcassets */,
 				50FA53582686E69400271485 /* LaunchScreen.storyboard */,
 				50FA535B2686E69400271485 /* Info.plist */,
 			);
 			path = FlickrImageSearch;
+			sourceTree = "<group>";
+		};
+		50FA53642686EE0200271485 /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				50FA53512686E69400271485 /* ViewController.swift */,
+			);
+			path = ViewController;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
