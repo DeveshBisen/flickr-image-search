@@ -18,7 +18,7 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     private static let imageViewHeight: CGFloat = 200
     private static let cellReuseIdentifier = "imageCellID"
     private static let defaultBackroundColor = UIColor.init(displayP3Red: 120/256, green: 160/256, blue: 200/256, alpha: 1)
-    private static let instructionLabelText = "Enter search keyword and hit enter."
+    private static let searchInstructionLabelText = "Enter search keyword and hit enter."
     private static let viewControllerTitleLabelText = "Flickr Image Search"
 
     // MARK: Private properties
@@ -31,13 +31,11 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         }
     }
 
-    private let instructionLabel = UILabel()
+    private let searchInstructionLabel = UILabel()
     private let viewControllerTitleLabel = UILabel()
 
     let searchBar = UISearchBar()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-
-    var fetchedImages: [FlickrImages]?
 
     // MARK: Lifecycle methods
 
@@ -50,13 +48,18 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         setupViewConstraints()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        searchBar.becomeFirstResponder()
+    }
+
     // MARK: Private helper methods
 
     private func setupViewHierarchy() {
         view.addSubview(viewControllerTitleLabel)
         view.addSubview(searchBar)
         view.addSubview(collectionView)
-        view.addSubview(instructionLabel)
+        view.addSubview(searchInstructionLabel)
     }
 
     private func setupSubviews() {
@@ -69,10 +72,10 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         viewControllerTitleLabel.backgroundColor = UIColor.clear
         viewControllerTitleLabel.sizeToFit()
 
-        instructionLabel.textColor = UIColor.white
-        instructionLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        instructionLabel.text = ViewController.instructionLabelText
-        instructionLabel.sizeToFit()
+        searchInstructionLabel.textColor = UIColor.white
+        searchInstructionLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        searchInstructionLabel.text = ViewController.searchInstructionLabelText
+        searchInstructionLabel.sizeToFit()
 
         collectionView.backgroundColor = ViewController.defaultBackroundColor
         collectionView.delegate   = self
@@ -111,10 +114,10 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         ])
 
         // Collection view constraints
-        instructionLabel.translatesAutoresizingMaskIntoConstraints = false
+        searchInstructionLabel.translatesAutoresizingMaskIntoConstraints = false
         constraintsArray.append(contentsOf: [
-            instructionLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
-            instructionLabel.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
+            searchInstructionLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
+            searchInstructionLabel.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
         ])
 
         // Activate constraints
@@ -123,28 +126,11 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         }
     }
 
-    private func fetchImages(for searchKey: String) {
-        NetworkManager.shared.fetchImagesMetadata(for: searchKey) { [weak self] reponse, error in
-            if error != nil {
-                return
-            }
-
-            guard let strongInstance = self else {
-                return
-            }
-
-            strongInstance.fetchedImages = reponse?.photos?.photo
-            DispatchQueue.main.async {
-                strongInstance.collectionView.reloadData()
-            }
-        }
-    }
-
     // MARK: UICollectionViewDataSource
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let imageCount = fetchedImages?.count ?? 0
-        instructionLabel.isHidden = imageCount > 0
+        let imageCount = DataManager.shared.fetchedImages?.count ?? 0
+        searchInstructionLabel.isHidden = imageCount > 0
         return imageCount
     }
 
@@ -153,8 +139,8 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
             return FlickrImageCell(frame: .zero)
         }
 
-        if indexPath.row < fetchedImages?.count ?? 0,
-           let imageInfo = fetchedImages?[indexPath.row],
+        if indexPath.row < DataManager.shared.fetchedImages?.count ?? 0,
+           let imageInfo = DataManager.shared.fetchedImages?[indexPath.row],
            let imageID = imageInfo.id,
            let serverID = imageInfo.server,
            let secretKey = imageInfo.secret {
@@ -184,6 +170,10 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     // MARK: UISearchBarDelegate
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        fetchImages(for: searchBar.text ?? "")
+        DataManager.shared.fetchImages(for: searchBar.text ?? "") { [weak self] in
+            DispatchQueue.main.async {
+                self?.collectionView.reloadData()
+            }
+        }
     }
 }

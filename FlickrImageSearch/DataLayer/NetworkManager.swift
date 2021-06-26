@@ -35,12 +35,8 @@ final class NetworkManager {
         }
 
         URLSession.shared.dataTask(with: URLRequest(url: requestUrl)) { data, urlResponse, error in
-            if error != nil {
-                completion(nil, error)
-                return
-            }
-
-            guard let httpResponse = urlResponse as? HTTPURLResponse,
+            guard error == nil,
+                  let httpResponse = urlResponse as? HTTPURLResponse,
                   (httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299),
                   let data = data else {
                 completion(nil, error)
@@ -49,7 +45,6 @@ final class NetworkManager {
 
             do {
                 let response = try JSONDecoder().decode(FlickrImagesSearchResponse.self, from: data)
-                debugPrint(response)
                 completion(response, nil)
             } catch let error {
                 completion(nil, error)
@@ -71,12 +66,8 @@ final class NetworkManager {
         }
 
         URLSession.shared.downloadTask(with: imageURL) { localURL, response, error in
-            if error != nil {
-                completion(nil, error)
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse,
+            guard error == nil,
+                  let httpResponse = response as? HTTPURLResponse,
                   (httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299),
                   let localURL = localURL else {
                 completion(nil, error)
