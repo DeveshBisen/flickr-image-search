@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		50B42037268726E200304E63 /* FlickrImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B42036268726E200304E63 /* FlickrImageCell.swift */; };
 		50FA534E2686E69400271485 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50FA534D2686E69400271485 /* AppDelegate.swift */; };
 		50FA53502686E69400271485 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50FA534F2686E69400271485 /* SceneDelegate.swift */; };
 		50FA53522686E69400271485 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50FA53512686E69400271485 /* ViewController.swift */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		50B42036268726E200304E63 /* FlickrImageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickrImageCell.swift; sourceTree = "<group>"; };
 		50FA534A2686E69400271485 /* FlickrImageSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlickrImageSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50FA534D2686E69400271485 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		50FA534F2686E69400271485 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -40,6 +42,7 @@
 		506C491C2687124800C2B525 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				50B42036268726E200304E63 /* FlickrImageCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -155,6 +158,7 @@
 			files = (
 				50FA53522686E69400271485 /* ViewController.swift in Sources */,
 				50FA534E2686E69400271485 /* AppDelegate.swift in Sources */,
+				50B42037268726E200304E63 /* FlickrImageCell.swift in Sources */,
 				50FA53502686E69400271485 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

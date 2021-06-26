@@ -71,7 +71,7 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
         collectionView.delegate   = self
         collectionView.dataSource = self
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 16.0, right: 0)
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: ViewController.cellReuseIdentifier)
+        collectionView.register(FlickrImageCell.self, forCellWithReuseIdentifier: ViewController.cellReuseIdentifier)
     }
 
     private func setupViewConstraints() {
@@ -120,9 +120,10 @@ class ViewController: UIViewController, UISearchBarDelegate, UICollectionViewDel
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ViewController.cellReuseIdentifier, for: indexPath)
-        cell.backgroundColor = UIColor.lightGray
-        return cell
+        guard let imageCell = collectionView.dequeueReusableCell(withReuseIdentifier: ViewController.cellReuseIdentifier, for: indexPath) as? FlickrImageCell else {
+            return FlickrImageCell(frame: .zero)
+        }
+        return imageCell
     }
 
     // MARK: UICollectionViewDelegateFlowLayout
