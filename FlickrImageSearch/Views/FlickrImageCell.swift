@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FlickrImageCell: UICollectionViewCell {
+final class FlickrImageCell: UICollectionViewCell {
 
     // MARK: Constants
 
@@ -16,7 +16,7 @@ class FlickrImageCell: UICollectionViewCell {
 
     // MARK: Properties
 
-    let imageView = UIImageView()
+    private let imageView = UIImageView()
 
     var image: UIImage? {
         didSet {

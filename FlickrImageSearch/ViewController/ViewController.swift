@@ -153,8 +153,13 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
            let secretKey = imageInfo.secret {
             imageCell.uniqueIdentifier = imageID
 
-            // Download image for given image ID.
-            DataManager.shared.getImage(for: imageID, serverID: serverID, secretKey: secretKey) { image in
+            // Get image from cache if exists, else download image.
+            let imageSize = CGSize(width: collectionView.frame.size.width, height: ViewController.imageViewHeight)
+            DataManager.shared.getImage(
+                for: imageID,
+                serverID: serverID,
+                secretKey: secretKey,
+                imageSize: imageSize) { image in
                 DispatchQueue.main.async {
                     if (imageCell.uniqueIdentifier == imageID) {
                         imageCell.image = image
@@ -172,6 +177,7 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView,
                         willDisplay cell: UICollectionViewCell,
                         forItemAt indexPath: IndexPath) {
+        // Starting fetching next page before reaching end of page.
         let startFetchingNextPage = (indexPath.row + (NetworkManager.imagePagingSize / 2)) > (DataManager.shared.fetchedImages?.count ?? 0)
         if (startFetchingNextPage && !isLoadingNextPage) {
             isLoadingNextPage = true

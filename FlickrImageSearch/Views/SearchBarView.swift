@@ -13,7 +13,7 @@ protocol SearchBarViewDelegate {
 
 }
 
-class SearchBarView: UIView {
+final class SearchBarView: UIView {
 
     // MARK: Constants
 
@@ -94,7 +94,7 @@ class SearchBarView: UIView {
         layer.borderWidth = SearchBarView.borderWidth
         clipsToBounds = true
 
-        searchButton.imageView?.contentMode = .scaleAspectFit;
+        searchButton.imageView?.contentMode = .scaleAspectFit
         searchButton.setImage(UIImage(named: "searchIcon"), for: .normal)
     }
 

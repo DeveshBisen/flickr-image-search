@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 final class NetworkManager {
 
@@ -67,7 +68,7 @@ final class NetworkManager {
     public func downloadImage(imageID: String,
                               serverID: String,
                               secretKey: String,
-                              completion: @escaping (Data?, Error?) -> (Void)) {
+                              completion: @escaping (URL?, Error?) -> (Void)) {
         guard let imageURL = URL(string: "https://live.staticflickr.com/\(serverID)/\(imageID)_\(secretKey).jpg") else {
             completion(nil, NSError())
             return
@@ -82,12 +83,7 @@ final class NetworkManager {
                 return
             }
 
-            do {
-                let data = try Data(contentsOf: localURL)
-                completion(data, nil)
-            } catch let error {
-                completion(nil, error)
-            }
+            completion(localURL, nil)
         }.resume()
     }
 
@@ -102,6 +98,7 @@ final class NetworkManager {
             URLQueryItem(name: "format", value: "json"),
             URLQueryItem(name: "nojsoncallback", value: "1"),
             URLQueryItem(name: "method", value: "flickr.photos.search"),
+            URLQueryItem(name: "sort", value: "relevance"),
             URLQueryItem(name: "api_key", value: NetworkManager.publicAPIKey),
             URLQueryItem(name: "text", value: searchKey),
             URLQueryItem(name: "per_page", value: "\(NetworkManager.imagePagingSize)"),

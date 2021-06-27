@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		50680D482688766600D3B971 /* ImageRenderUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50680D472688766600D3B971 /* ImageRenderUtils.swift */; };
 		50B42037268726E200304E63 /* FlickrImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B42036268726E200304E63 /* FlickrImageCell.swift */; };
 		50B4203B2687310800304E63 /* DataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B4203A2687310800304E63 /* DataModels.swift */; };
 		50B420402687336F00304E63 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B4203F2687336F00304E63 /* NetworkManager.swift */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		50680D472688766600D3B971 /* ImageRenderUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderUtils.swift; sourceTree = "<group>"; };
 		50B42036268726E200304E63 /* FlickrImageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickrImageCell.swift; sourceTree = "<group>"; };
 		50B4203A2687310800304E63 /* DataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModels.swift; sourceTree = "<group>"; };
 		50B4203F2687336F00304E63 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
@@ -47,6 +49,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		50680D462688762F00D3B971 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				50680D472688766600D3B971 /* ImageRenderUtils.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		506C491C2687124800C2B525 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +95,7 @@
 		50FA534C2686E69400271485 /* FlickrImageSearch */ = {
 			isa = PBXGroup;
 			children = (
+				50680D462688762F00D3B971 /* Utils */,
 				50B42039268730CD00304E63 /* DataLayer */,
 				506C491C2687124800C2B525 /* Views */,
 				50FA53642686EE0200271485 /* ViewController */,
@@ -182,6 +193,7 @@
 				50E1274A26878EB200E2F4D3 /* DataManager.swift in Sources */,
 				50E1274D26879D0900E2F4D3 /* SearchBarView.swift in Sources */,
 				50B42037268726E200304E63 /* FlickrImageCell.swift in Sources */,
+				50680D482688766600D3B971 /* ImageRenderUtils.swift in Sources */,
 				50B4203B2687310800304E63 /* DataModels.swift in Sources */,
 				50FA53502686E69400271485 /* SceneDelegate.swift in Sources */,
 			);

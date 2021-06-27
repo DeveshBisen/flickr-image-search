@@ -16,15 +16,18 @@ final class DataManager {
 
     // MARK: Properties
 
-    public private(set) var fetchedImages: [FlickrImagesModel]?
-    public private(set) var fetchedPages: Int = 0
+    private(set) var fetchedImages: [FlickrImagesModel]?
+    private(set) var fetchedPages: Int = 0
     private let imageCache = NSCache<NSString, UIImage>()
+
+    private static let enableDownsampling = true
 
     // MARK: Initalizer
 
     private init() {
-        // Approx 30 MB image cache
-        imageCache.totalCostLimit = 30_000_000
+        // Approx 50 MB image cache
+        imageCache.totalCostLimit = 50_00_0000
+        imageCache.countLimit = 100
     }
 
     // MARK: Public helper methods
@@ -38,6 +41,7 @@ final class DataManager {
             if pageNumber == 1 {
                 self?.fetchedImages = photos
             } else if self?.fetchedPages == pageNumber - 1 {
+                // Append images metadata obtained of subsequent fetched pages.
                 self?.fetchedImages?.append(contentsOf: photos)
             }
             self?.fetchedPages = reponse?.photos?.page ?? 0
@@ -48,6 +52,7 @@ final class DataManager {
     public func getImage(for imageID: String,
                          serverID: String,
                          secretKey: String,
+                         imageSize: CGSize,
                          completion: @escaping (UIImage?) -> (Void)) {
         if let image = imageCache.object(forKey: imageID as NSString) {
             completion(image)
@@ -58,10 +63,10 @@ final class DataManager {
         NetworkManager.shared.downloadImage(
             imageID: imageID,
             serverID: serverID,
-            secretKey: secretKey) { [weak self] data, error in
-            guard let data = data,
-                  let downloadedImage = UIImage(data: data),
-                  error == nil else {
+            secretKey: secretKey) { [weak self] localURL, error in
+            guard error == nil,
+                  let localURL = localURL,
+                  let downloadedImage = DataManager.imageModel(for: localURL, imageSize: imageSize) else {
                 completion(UIImage(named: "placeholderImage"))
                 return
             }
@@ -70,5 +75,20 @@ final class DataManager {
             self?.imageCache.setObject(downloadedImage, forKey: imageID as NSString)
             completion(downloadedImage)
         }
+    }
+
+    // MARK: Private helper methods
+
+    private static func imageModel(for localURL: URL, imageSize: CGSize) -> UIImage? {
+        guard !DataManager.enableDownsampling else {
+            return ImageRenderUtils.downsample(imageAt: localURL, to: imageSize)
+        }
+
+        do {
+            return UIImage(data: try Data(contentsOf: localURL))
+        } catch let error {
+            print(error.localizedDescription)
+        }
+        return nil
     }
 }
