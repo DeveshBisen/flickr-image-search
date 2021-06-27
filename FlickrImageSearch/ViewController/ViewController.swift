@@ -20,8 +20,8 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
     private static let minimumInteritemSpacing: CGFloat = 4.0
 
     private static let cellReuseIdentifier = "imageCellReuseID"
-    private static let viewControllerTitleLabelText = "Flickr Image Search"
-    private static let searchImageNotFoundText = "Photos for entered search keyword not found"
+    private static let viewControllerTitleLabelText = NSLocalizedString("view_controller_title_label", comment: "")
+    private static let searchImageNotFoundLabelText = NSLocalizedString("searched_image_not_found_label_text", comment: "")
 
     private static let defaultBackroundColor = UIColor.init(displayP3Red: 120/256, green: 160/256, blue: 200/256, alpha: 1)
 
@@ -81,7 +81,7 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
 
         imageNotFoundLabel.textColor = UIColor.white
         imageNotFoundLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        imageNotFoundLabel.text = ViewController.searchImageNotFoundText
+        imageNotFoundLabel.text = ViewController.searchImageNotFoundLabelText
         imageNotFoundLabel.sizeToFit()
         imageNotFoundLabel.isHidden = true
 

@@ -1,0 +1,10 @@
+/* 
+ Localized.strings
+ FlickrImageSearch
+
+ Created by Devesh Bisen on 27/06/21.
+
+ */
+
+"view_controller_title_label" = "Búsqueda de imágenes de Flickr";
+"searched_image_not_found_label_text" = "Fotos de la palabra clave de búsqueda ingresada no encontrada.";
