@@ -24,11 +24,14 @@ class FlickrImageCell: UICollectionViewCell {
         }
     }
 
+    var uniqueIdentifier: String = ""
+
     // MARK: Initializers
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupAndStylizeSubviews()
+        setupConstraints()
     }
 
     required init?(coder: NSCoder) {
@@ -40,18 +43,18 @@ class FlickrImageCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         image = nil
+        uniqueIdentifier = ""
     }
 
     // MARK: Private helper methods
 
     private func setupAndStylizeSubviews() {
-        layer.cornerRadius = FlickrImageCell.cornerRadius
-        clipsToBounds = true
-
         addSubview(imageView)
         imageView.backgroundColor = FlickrImageCell.backroundColor
         imageView.contentMode = .scaleAspectFill
-        setupConstraints()
+
+        layer.cornerRadius = FlickrImageCell.cornerRadius
+        clipsToBounds = true
     }
 
     private func setupConstraints() {

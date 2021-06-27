@@ -17,6 +17,7 @@ final class DataManager {
     // MARK: Properties
 
     public private(set) var fetchedImages: [FlickrImagesModel]?
+    public private(set) var fetchedPages: Int = 0
     private let imageCache = NSCache<NSString, UIImage>()
 
     // MARK: Initalizer
@@ -28,13 +29,18 @@ final class DataManager {
 
     // MARK: Public helper methods
 
-    func fetchImagesMetadata(for searchKey: String, completion: @escaping () -> ()) {
-        NetworkManager.shared.fetchImagesMetadata(for: searchKey) { [weak self] reponse, error in
+    func fetchImagesMetadata(for searchKey: String, pageNumber: Int = 1, completion: @escaping () -> ()) {
+        NetworkManager.shared.fetchImagesMetadata(for: searchKey, pageNumber: pageNumber) { [weak self] reponse, error in
             guard error == nil, let photos = reponse?.photos?.photo else {
                 return
             }
 
-            self?.fetchedImages = photos
+            if pageNumber == 1 {
+                self?.fetchedImages = photos
+            } else if self?.fetchedPages == pageNumber - 1 {
+                self?.fetchedImages?.append(contentsOf: photos)
+            }
+            self?.fetchedPages = reponse?.photos?.page ?? 0
             completion()
         }
     }

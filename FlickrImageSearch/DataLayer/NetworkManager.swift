@@ -21,6 +21,8 @@ final class NetworkManager {
      */
     private static let publicAPIKey = "1599b5d9c1683251cff2f8ea545cf102"
 
+    public static let imagePagingSize = 30
+
     // MARK: Initalizer
 
     private init() {
@@ -32,8 +34,10 @@ final class NetworkManager {
     /**
      API doc for query format - https://www.flickr.com/services/api/explore/flickr.photos.search
      */
-    public func fetchImagesMetadata(for searchKey: String, completion: @escaping (FlickrImagesSearchResultModel?, Error?) -> (Void)) {
-        guard let requestUrl = NetworkManager.url(for: searchKey) else {
+    public func fetchImagesMetadata(for searchKey: String,
+                                    pageNumber: Int,
+                                    completion: @escaping (FlickrImagesSearchResultModel?, Error?) -> (Void)) {
+        guard let requestUrl = NetworkManager.url(for: searchKey, pageNumber: pageNumber) else {
             completion(nil, NSError())
             return
         }
@@ -89,17 +93,19 @@ final class NetworkManager {
 
     // MARK: Private helper method
 
-    private static func url(for searchKey: String) -> URL? {
+    private static func url(for searchKey: String, pageNumber: Int) -> URL? {
         var component = URLComponents()
         component.scheme = "https"
         component.host = "www.flickr.com"
         component.path = "/services/rest/"
         component.queryItems = [
-            URLQueryItem(name: "method", value: "flickr.photos.search"),
-            URLQueryItem(name: "api_key", value: NetworkManager.publicAPIKey),
             URLQueryItem(name: "format", value: "json"),
             URLQueryItem(name: "nojsoncallback", value: "1"),
-            URLQueryItem(name: "text", value: searchKey)
+            URLQueryItem(name: "method", value: "flickr.photos.search"),
+            URLQueryItem(name: "api_key", value: NetworkManager.publicAPIKey),
+            URLQueryItem(name: "text", value: searchKey),
+            URLQueryItem(name: "per_page", value: "\(NetworkManager.imagePagingSize)"),
+            URLQueryItem(name: "page", value: "\(pageNumber)")
         ]
         return component.url
     }

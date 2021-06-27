@@ -41,6 +41,9 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
     let searchBarView = SearchBarView()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
+    var previousSearchedKeyword: String = ""
+    var isLoadingNextPage: Bool = false
+
     // MARK: Lifecycle methods
 
     override func viewDidLoad() {
@@ -148,9 +151,14 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
            let imageID = imageInfo.id,
            let serverID = imageInfo.server,
            let secretKey = imageInfo.secret {
+            imageCell.uniqueIdentifier = imageID
+
+            // Download image for given image ID.
             DataManager.shared.getImage(for: imageID, serverID: serverID, secretKey: secretKey) { image in
                 DispatchQueue.main.async {
-                    imageCell.image = image
+                    if (imageCell.uniqueIdentifier == imageID) {
+                        imageCell.image = image
+                    }
                 }
             }
         } else {
@@ -159,7 +167,25 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
         return imageCell
     }
 
-    // MARK: UICollectionViewDelegateFlowLayout
+    // MARK: UICollectionViewDelegate
+
+    func collectionView(_ collectionView: UICollectionView,
+                        willDisplay cell: UICollectionViewCell,
+                        forItemAt indexPath: IndexPath) {
+        let startFetchingNextPage = (indexPath.row + (NetworkManager.imagePagingSize / 2)) > (DataManager.shared.fetchedImages?.count ?? 0)
+        if (startFetchingNextPage && !isLoadingNextPage) {
+            isLoadingNextPage = true
+            DataManager.shared.fetchImagesMetadata(for: previousSearchedKeyword, pageNumber: DataManager.shared.fetchedPages + 1) { [weak self] in
+                let weakSelf = self
+                DispatchQueue.main.async { [weakSelf] in
+                    weakSelf?.isLoadingNextPage = false
+                    weakSelf?.collectionView.reloadData()
+                }
+            }
+        }
+    }
+
+    // MARK: UICollectionViewDelegateFlowLayoutDelegate
 
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
@@ -177,19 +203,19 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
 
     // MARK: SearchBarViewDelegate
 
-    func didTapSearchIcon(searchText: String) {
+    func didTapSearchButton(searchText: String) {
+        previousSearchedKeyword = searchText
         if !searchText.isEmpty {
             DataManager.shared.fetchImagesMetadata(for: searchText) { [weak self] in
                 let weakSelf = self
                 DispatchQueue.main.async { [weakSelf] in
                     weakSelf?.collectionView.reloadData()
 
-                    // Scroll to top after collection view reload
-                    if (weakSelf?.collectionView.numberOfItems(inSection: 0) ?? 0) > 0 {
+                    let isEmptyFeed = (weakSelf?.collectionView.numberOfItems(inSection: 0) ?? 0) == 0
+                    weakSelf?.imageNotFoundLabel.isHidden = !isEmptyFeed
+                    if !isEmptyFeed {
+                        // Scroll to top after collection view reload
                         weakSelf?.collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-                        weakSelf?.imageNotFoundLabel.isHidden = true
-                    } else {
-                        weakSelf?.imageNotFoundLabel.isHidden = false
                     }
                 }
             }
