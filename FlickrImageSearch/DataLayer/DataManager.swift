@@ -16,7 +16,7 @@ final class DataManager {
 
     // MARK: Properties
 
-    private(set) var fetchedImages: [FlickrImagesModel]?
+    private(set) var fetchedImageModels: [FlickrImagesModel]?
     private(set) var fetchedPages: Int = 0
     private let imageCache = NSCache<NSString, UIImage>()
 
@@ -39,10 +39,10 @@ final class DataManager {
             }
 
             if pageNumber == 1 {
-                self?.fetchedImages = photos
+                self?.fetchedImageModels = photos
             } else if self?.fetchedPages == pageNumber - 1 {
                 // Append images metadata obtained of subsequent fetched pages.
-                self?.fetchedImages?.append(contentsOf: photos)
+                self?.fetchedImageModels?.append(contentsOf: photos)
             }
             self?.fetchedPages = reponse?.photos?.page ?? 0
             completion()
