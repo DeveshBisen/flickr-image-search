@@ -137,7 +137,7 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
     // MARK: UICollectionViewDataSource
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return DataManager.shared.fetchedImages?.count ?? 0
+        return DataManager.shared.fetchedImageModels?.count ?? 0
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -146,8 +146,8 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
             for: indexPath) as? FlickrImageCell
         let imageCell = reusableCell ?? FlickrImageCell(frame: .zero)
 
-        if indexPath.row < DataManager.shared.fetchedImages?.count ?? 0,
-           let imageInfo = DataManager.shared.fetchedImages?[indexPath.row],
+        if indexPath.row < DataManager.shared.fetchedImageModels?.count ?? 0,
+           let imageInfo = DataManager.shared.fetchedImageModels?[indexPath.row],
            let imageID = imageInfo.id,
            let serverID = imageInfo.server,
            let secretKey = imageInfo.secret {
@@ -178,7 +178,7 @@ class ViewController: UIViewController, SearchBarViewDelegate, UICollectionViewD
                         willDisplay cell: UICollectionViewCell,
                         forItemAt indexPath: IndexPath) {
         // Starting fetching next page before reaching end of page.
-        let startFetchingNextPage = (indexPath.row + (NetworkManager.imagePagingSize / 2)) > (DataManager.shared.fetchedImages?.count ?? 0)
+        let startFetchingNextPage = (indexPath.row + (NetworkManager.imagePagingSize / 2)) > (DataManager.shared.fetchedImageModels?.count ?? 0)
         if (startFetchingNextPage && !isLoadingNextPage) {
             isLoadingNextPage = true
             DataManager.shared.fetchImagesMetadata(for: previousSearchedKeyword, pageNumber: DataManager.shared.fetchedPages + 1) { [weak self] in

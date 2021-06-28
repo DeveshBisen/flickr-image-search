@@ -20,7 +20,7 @@ final class NetworkManager {
      Since this is public API keys, it's gets exprired maybe less then 12 hours.
      We need to use latest key for accessing Flickr API.
      */
-    private static let publicAPIKey = "1b6b09feaaca2129499fecb1b95bb4ee"
+    private static let publicAPIKey = "8c65eced899e097d79e6dc3f134dfe5d"
 
     public static let imagePagingSize = 30
 
